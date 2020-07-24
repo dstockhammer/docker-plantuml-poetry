@@ -27,15 +27,15 @@ For example, if you're using [MkDocs](https://github.com/mkdocs/mkdocs), the
 
     ENTRYPOINT [ "poetry", "run", "mkdocs" ]
 
-Then simply build your image:
+Then build your image:
 
     docker build -t my-docs .
 
 To build the site to `./site` mount the project dir to `/app` and run `build`:
 
-    docker run --rm -v $(shell pwd):/app my-docs build
+    docker run --rm -v $(pwd):/app my-docs build
 
 You can also launch the dev server to get auto reload and everything you would
 expect as if the tools were installed locally:
 
-    docker run -p 8000:8000 -v $(shell pwd):/app -it my-docs serve --dev-addr 0.0.0.0:8000
+    docker run -p 8000:8000 -v $(pwd):/app -it my-docs serve --dev-addr 0.0.0.0:8000
