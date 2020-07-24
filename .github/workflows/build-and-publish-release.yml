@@ -16,8 +16,15 @@ jobs:
           | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
     - name: Build Docker image
       run: |
+        chmod +x plantuml.sh
         docker build -t plantuml-poetry:latest . \
           --build-arg "plantuml_version=${GITHUB_REF##*/}"
+    - name: Test all required executables
+      run: |
+        docker run --rm plantuml-poetry plantuml -version
+        docker run --rm plantuml-poetry java --version
+        docker run --rm plantuml-poetry python --version
+        docker run --rm plantuml-poetry poetry --version
     - name: Tag Docker image
       run: |
         docker tag plantuml-poetry:latest dstockhammer/plantuml-poetry:latest

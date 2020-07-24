@@ -4,6 +4,8 @@ ARG python_version="3.8"
 FROM dstockhammer/plantuml:${plantuml_version} as plantuml
 FROM python:${python_version}-slim
 
+COPY --from=plantuml /app/plantuml.jar /opt/plantuml.jar
+
 RUN mkdir -p /usr/share/man/man1 \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -13,5 +15,4 @@ RUN mkdir -p /usr/share/man/man1 \
 
 RUN pip install poetry
 
-COPY --from=plantuml /app/plantuml.jar /opt/plantuml.jar
 COPY plantuml.sh /usr/local/bin/plantuml
