@@ -1,0 +1,28 @@
+name: Build and publish Docker image
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Log in to Docker registry
+      run: |
+        echo ${{ secrets.DOCKER_PASSWORD }} \
+          | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+    - name: Build Docker image
+      run: |
+        docker build -t plantuml-poetry:latest . \
+          --build-arg "plantuml_version=${GITHUB_REF##*/}"
+    - name: Tag Docker image
+      run: |
+        docker tag plantuml-poetry:latest dstockhammer/plantuml-poetry:latest
+        docker tag plantuml-poetry:latest dstockhammer/plantuml-poetry:${GITHUB_REF##*/}
+    - name: Push Docker images
+      run: |
+        docker push dstockhammer/plantuml-poetry:${GITHUB_REF##*/}
+        docker push dstockhammer/plantuml-poetry:latest
