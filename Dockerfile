@@ -1,8 +1,5 @@
-ARG plantuml_version
-ARG python_version="3.8"
-
-FROM dstockhammer/plantuml:${plantuml_version} as plantuml
-FROM python:${python_version}-slim
+FROM dstockhammer/plantuml:1.2020.22 as plantuml
+FROM python:3.8-slim
 
 COPY --from=plantuml /app/plantuml.jar /opt/plantuml.jar
 

@@ -1,35 +1,112 @@
 name: Build and publish Docker image
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Log in to Docker registry
-      run: |
-        echo ${{ secrets.DOCKER_PASSWORD }} \
-          | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-    - name: Build Docker image
-      run: |
-        chmod +x plantuml.sh
-        docker build -t plantuml-poetry:latest . \
-          --build-arg "plantuml_version=${GITHUB_REF##*/}"
-    - name: Test all required executables
-      run: |
-        docker run --rm plantuml-poetry plantuml -version
-        docker run --rm plantuml-poetry java --version
-        docker run --rm plantuml-poetry python --version
-        docker run --rm plantuml-poetry poetry --version
-    - name: Tag Docker image
-      run: |
-        docker tag plantuml-poetry:latest dstockhammer/plantuml-poetry:latest
-        docker tag plantuml-poetry:latest dstockhammer/plantuml-poetry:${GITHUB_REF##*/}
-    - name: Push Docker images
-      run: |
-        docker push dstockhammer/plantuml-poetry:${GITHUB_REF##*/}
-        docker push dstockhammer/plantuml-poetry:latest
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker registry
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} \
+            | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Get PlantUML version
+        id: get_plantuml_version
+        run: |
+          grep 'FROM dstockhammer/plantuml' Dockerfile | grep -oP '([0-9\.]+)' > version.txt
+          echo "::set-output name=version::$(cat version.txt)"
+
+      - name: Check if the PlantUML version tag already exists
+        uses: mukunku/tag-exists-action@v1.0.0
+        id: check_version_tag
+        with:
+          tag: ${{ steps.get_plantuml_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t plantuml:latest .
+
+      - name: Test all required executables and build release body
+        run: |
+          echo '## PlantUML' > release_body.md
+          echo "https://github.com/plantuml/plantuml/releases/tag/v${{ steps.get_plantuml_version.outputs.version }}" >> release_body.md
+          echo '' >> release_body.md
+          echo '```' >> release_body.md
+          docker run --rm plantuml-poetry plantuml -version >> release_body.md
+          echo '```' >> release_body.md
+          echo '' >> release_body.md
+
+          echo '## Python' > release_body.md
+          echo '' >> release_body.md
+          echo '```' >> release_body.md
+          docker run --rm plantuml-poetry python --version >> release_body.md
+          echo '```' >> release_body.md
+          echo '' >> release_body.md
+
+          echo '## Poetry' > release_body.md
+          echo '' >> release_body.md
+          echo '```' >> release_body.md
+          docker run --rm plantuml-poetry poetry --version >> release_body.md
+          echo '```' >> release_body.md
+          echo '' >> release_body.md
+
+          echo '## OpenJDK' > release_body.md
+          echo '' >> release_body.md
+          echo '```' >> release_body.md
+          docker run --rm plantuml-poetry java --version >> release_body.md
+          echo '```' >> release_body.md
+
+      - name: Create release
+        uses: actions/create-release@v1
+        if: ${{ github.ref == 'refs/heads/master' && steps.check_version_tag.outputs.exists == 'false' }}
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_plantuml_version.outputs.version }}
+          release_name: ${{ steps.get_plantuml_version.outputs.version }}
+          body_path: release_body.md
+          draft: false
+          prerelease: false
+
+      - name: Upload generated files
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: generated-files
+          path: test/*.png
+
+      - name: Upload version info as release asset
+        uses: actions/upload-release-asset@v1
+        if: ${{ github.ref == 'refs/heads/master' && steps.check_version_tag.outputs.exists == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: test/version.png
+          asset_name: version.png
+          asset_content_type: image/png
+
+      - name: Tag Docker image
+        run: |
+          docker tag plantuml:latest dstockhammer/plantuml-poetry:latest
+          docker tag plantuml:latest dstockhammer/plantuml-poetry:${{ steps.get_plantuml_version.outputs.version }}
+
+      - name: Push Docker images
+        if: ${{ github.ref == 'refs/heads/master' && steps.check_version_tag.outputs.exists == 'false' }}
+        run: |
+          docker push dstockhammer/plantuml-poetry:latest
+          docker push dstockhammer/plantuml-poetry:${{ steps.get_plantuml_version.outputs.version }}
