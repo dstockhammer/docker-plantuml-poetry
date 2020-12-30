@@ -37,7 +37,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t plantuml:latest .
+          docker build -t plantuml-poetry:latest .
 
       - name: Test all required executables and build release body
         run: |
@@ -102,8 +102,8 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag plantuml:latest dstockhammer/plantuml-poetry:latest
-          docker tag plantuml:latest dstockhammer/plantuml-poetry:${{ steps.get_plantuml_version.outputs.version }}
+          docker tag plantuml-poetry:latest dstockhammer/plantuml-poetry:latest
+          docker tag plantuml-poetry:latest dstockhammer/plantuml-poetry:${{ steps.get_plantuml_version.outputs.version }}
 
       - name: Push Docker images
         if: ${{ github.ref == 'refs/heads/master' && steps.check_version_tag.outputs.exists == 'false' }}
