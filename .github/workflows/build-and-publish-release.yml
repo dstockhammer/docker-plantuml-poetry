@@ -37,6 +37,7 @@ jobs:
 
       - name: Build Docker image
         run: |
+          chmod +x plantuml.sh
           docker build -t plantuml-poetry:latest .
 
       - name: Test all required executables and build release body
@@ -81,24 +82,6 @@ jobs:
           body_path: release_body.md
           draft: false
           prerelease: false
-
-      - name: Upload generated files
-        uses: actions/upload-artifact@v2
-        if: ${{ always() }}
-        with:
-          name: generated-files
-          path: test/*.png
-
-      - name: Upload version info as release asset
-        uses: actions/upload-release-asset@v1
-        if: ${{ github.ref == 'refs/heads/master' && steps.check_version_tag.outputs.exists == 'false' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: test/version.png
-          asset_name: version.png
-          asset_content_type: image/png
 
       - name: Tag Docker image
         run: |
