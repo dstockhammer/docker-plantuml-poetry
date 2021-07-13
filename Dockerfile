@@ -1,5 +1,5 @@
 FROM dstockhammer/plantuml:1.2021.8 as plantuml
-FROM python:3.9.5-slim
+FROM python:3.9.6-slim
 
 COPY --from=plantuml /app/plantuml.jar /opt/plantuml.jar
 
