@@ -2,8 +2,8 @@ FROM dstockhammer/plantuml:1.2021.12 as plantuml
 FROM eclipse-temurin:17 as jdk
 FROM python:3.10.0-slim
 
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
 ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 COPY --from=plantuml /app/plantuml.jar /opt/plantuml.jar
 COPY --from=jdk $JAVA_HOME $JAVA_HOME
