@@ -14,14 +14,14 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONHASHSEED=random
 ENV PIP_NO_CACHE_DIR=off
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
+ENV POETRY_NO_INTERACTION=1
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 RUN apt-get update \
  && apt-get install --yes --no-install-recommends \
       graphviz \
       fonts-dejavu \
- && rm -rf /var/lib/apt/lists/*
-
-RUN pip install poetry \
- && poetry config virtualenvs.create false
+ && rm -rf /var/lib/apt/lists/* \
+ && pip install poetry
 
 COPY plantuml.sh /usr/local/bin/plantuml
