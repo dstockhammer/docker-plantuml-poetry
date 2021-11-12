@@ -18,7 +18,8 @@ ENV POETRY_NO_INTERACTION=1
 ENV POETRY_VIRTUALENVS_CREATE=false
 
 RUN apt-get update \
- && apt-get install --yes --no-install-recommends \
+ && apt-get install -qq --yes --no-install-recommends \
+      git \
       graphviz \
       fonts-dejavu \
  && rm -rf /var/lib/apt/lists/* \
