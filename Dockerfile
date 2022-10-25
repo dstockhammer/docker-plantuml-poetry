@@ -1,4 +1,4 @@
-FROM dstockhammer/plantuml:1.2022.7 as plantuml
+FROM dstockhammer/plantuml:1.2022.12 as plantuml
 FROM eclipse-temurin:17 as jdk
 FROM python:3.10.7-slim
 
