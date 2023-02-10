@@ -1,6 +1,6 @@
 FROM dstockhammer/plantuml:1.2023.0 as plantuml
 FROM eclipse-temurin:17 as jdk
-FROM python:3.11.1-slim
+FROM python:3.11.2-slim
 
 COPY --from=plantuml /app/plantuml.jar /opt/plantuml.jar
 
