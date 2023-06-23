@@ -14,28 +14,35 @@ Simply create a `Dockerfile` in your project root to build and run your project.
 For example, if you're using [MkDocs](https://github.com/mkdocs/mkdocs), the
 `Dockerfile` would look something like this:
 
-    FROM dstockhammer/plantuml-poetry
+```dockerfile
+FROM dstockhammer/plantuml-poetry
 
-    WORKDIR /app
+WORKDIR /app
 
-    COPY pyproject.toml .
-    COPY poetry.lock .
+COPY pyproject.toml .
+COPY poetry.lock .
 
-    RUN poetry install
+RUN poetry install
 
-    EXPOSE 8000
+EXPOSE 8000
 
-    ENTRYPOINT [ "poetry", "run", "mkdocs" ]
+ENTRYPOINT [ "poetry", "run", "mkdocs" ]
+```
 
 Then build your image:
 
-    docker build -t my-docs .
-
+```sh
+docker build -t my-docs .
+```
 To build the site to `./site` mount the project dir to `/app` and run `build`:
 
-    docker run --rm -v $(pwd):/app my-docs build
+```sh
+docker run --rm -v $(pwd):/app my-docs build
+```
 
 You can also launch the dev server to get auto reload and everything you would
 expect as if the tools were installed locally:
 
-    docker run -p 8000:8000 -v $(pwd):/app -it my-docs serve --dev-addr 0.0.0.0:8000
+```sh
+docker run -p 8000:8000 -v $(pwd):/app -it my-docs serve --dev-addr 0.0.0.0:8000
+```
