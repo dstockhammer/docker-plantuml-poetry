@@ -1,6 +1,6 @@
 FROM plantuml/plantuml:1.2023.10 as plantuml
 FROM eclipse-temurin:17 as jdk
-FROM python:3.11.4-slim
+FROM dstockhammer/python-poetry:3.11-1.5.1
 
 COPY --from=plantuml /opt/plantuml.jar /opt/plantuml.jar
 
@@ -9,23 +9,12 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 COPY --from=jdk $JAVA_HOME $JAVA_HOME
 
-ENV PYTHONFAULTHANDLER=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONHASHSEED=random \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_NO_ANSI=1  \
-    POETRY_VIRTUALENVS_CREATE=false
-
 RUN apt-get update \
  && apt-get install -qq --yes --no-install-recommends \
       git \
       graphviz \
       fonts-dejavu \
       curl \
- && rm -rf /var/lib/apt/lists/* \
- && pip install --no-cache-dir poetry \
- && poetry --version
+ && rm -rf /var/lib/apt/lists/*
 
 COPY plantuml.sh /usr/local/bin/plantuml
