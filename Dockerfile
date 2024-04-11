@@ -1,6 +1,6 @@
 FROM plantuml/plantuml:1.2024.4 as plantuml
 FROM eclipse-temurin:21 as jdk
-FROM dstockhammer/python-poetry:3.12.2-1.7.1
+FROM dstockhammer/python-poetry:3.12.3-1.8.2
 
 COPY --from=plantuml /opt/plantuml.jar /opt/plantuml.jar
 
