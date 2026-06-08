@@ -1,4 +1,4 @@
-FROM plantuml/plantuml:1.2026.4 AS plantuml
+FROM plantuml/plantuml:1.2026.6 AS plantuml
 FROM eclipse-temurin:25 AS jdk
 FROM dstockhammer/python-poetry:3.14.5-2.4.1
 
